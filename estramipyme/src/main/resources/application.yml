@@ -1,13 +1,17 @@
 server:
-  port: 8080
+  servlet:
+    context-path: "/estramipyme/api/v1"
+  port: ${PORT}
 
 spring:
   application:
     name: estramipyme
+  profiles:
+    active: ${PROFILES_ACTIVE}
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
-    password:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
