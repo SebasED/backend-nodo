@@ -3,9 +3,9 @@ package estramipyme.service;
 import estramipyme.model.User;
 import estramipyme.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -21,11 +21,13 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     HashMap<String, Object> response_data;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<User> getUsers() {
@@ -68,6 +70,12 @@ public class UserService {
             response_data.put("status", HttpStatus.CONFLICT.value());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response_data);
         }
+
+        // Encrypt the password before saving
+        String encryptedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encryptedPassword);
+
+
 
         try {
             User userSaved = this.userRepository.save(user);
@@ -139,6 +147,10 @@ public class UserService {
             response_data.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response_data);
         }
+    }
+
+    public boolean checkPassword(String rawPassword, String encodedPassword) {
+        return this.passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
 }
