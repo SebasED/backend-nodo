@@ -1,21 +1,16 @@
-package estramipyme.model;
+package estramipyme.dto;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 
-@Entity
-@Table(name = "\"user\"", schema = "public")
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class UserResponseDto {
+
     private Long id;
 
     @NotEmpty
     private String businessname;
 
     @NotEmpty
-    @Column(unique = true)
     private String docnumber;
 
     @NotEmpty
@@ -23,11 +18,7 @@ public class User {
 
     @Email
     @NotEmpty
-    @Column(unique = true)
     private String email;
-
-    @NotEmpty
-    private String password;
 
     @NotEmpty
     private String persontype;
@@ -38,24 +29,16 @@ public class User {
     @NotEmpty
     private String surname;
 
-    public User() {
+    public UserResponseDto() {
     }
 
-    public User(Long id,
-                String businessname,
-                String docnumber,
-                String doctype,
-                String email,
-                String password,
-                String persontype,
-                String sector,
-                String surname) {
+    public UserResponseDto(Long id, String businessname, String docnumber, String doctype,
+                   String email, String persontype, String sector, String surname) {
         this.id = id;
         this.businessname = businessname;
         this.docnumber = docnumber;
         this.doctype = doctype;
         this.email = email;
-        this.password = password;
         this.persontype = persontype;
         this.sector = sector;
         this.surname = surname;
@@ -99,14 +82,6 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getPersontype() {

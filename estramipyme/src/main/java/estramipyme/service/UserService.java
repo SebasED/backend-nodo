@@ -1,5 +1,8 @@
 package estramipyme.service;
 
+import estramipyme.dto.LoginRequestDto;
+import estramipyme.dto.LoginResponseDto;
+import estramipyme.dto.UserResponseDto;
 import estramipyme.model.User;
 import estramipyme.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -29,8 +33,39 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public List<User> getUsers() {
-        return this.userRepository.findAll();
+    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
+        response_data = new HashMap<>();
+
+        Optional<User> userOptional = userRepository.findByEmail(loginRequestDto.getEmail());
+        LoginResponseDto loginResponseDto = new LoginResponseDto();
+
+        // Verify if email exists
+        if (userOptional.isEmpty()) {
+            loginResponseDto.setMessage("Invalid username or password");
+            loginResponseDto.setStatus(false);
+
+            return loginResponseDto;
+        }
+
+        User user = userOptional.get();
+
+        if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())) {
+            loginResponseDto.setMessage("Invalid username or password");
+            loginResponseDto.setStatus(false);
+
+            return loginResponseDto;
+        }
+
+        loginResponseDto.setMessage("OK");
+        loginResponseDto.setStatus(true);
+
+        return  loginResponseDto;
+    }
+
+    public List<UserResponseDto> getUsers() {
+        List<User> users= this.userRepository.findAll();
+        List<UserResponseDto> usersDto =  users.stream().map(this::convertToDto).collect(Collectors.toList());
+        return usersDto;
     }
 
     public ResponseEntity<?> getUser(Long id) {
@@ -38,7 +73,8 @@ public class UserService {
         Optional<User> optionalUser = this.userRepository.findById(id);
 
         if (optionalUser.isPresent()){
-            return ResponseEntity.ok(optionalUser.get());
+            UserResponseDto userDto = this.convertToDto(optionalUser.get());
+            return ResponseEntity.ok(userDto);
         }
 
         response_data.put("error", true);
@@ -76,12 +112,13 @@ public class UserService {
 
         try {
             User userSaved = this.userRepository.save(user);
+            UserResponseDto userDto = this.convertToDto(userSaved);
             URI userLocation = ServletUriComponentsBuilder
                     .fromCurrentRequest()
                     .path("/{id}")
                     .buildAndExpand(userSaved.getId())
                     .toUri();
-            return ResponseEntity.created(userLocation).body(userSaved);
+            return ResponseEntity.created(userLocation).body(userDto);
         } catch (Exception e) {
             response_data.put("error", true);
             response_data.put("message", "Error del servidor: " + e.getMessage());
@@ -110,9 +147,14 @@ public class UserService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response_data);
         }
 
+        // Encrypt the password before saving
+        String encryptedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encryptedPassword);
+
         try {
             User userUpdated = this.userRepository.save(user);
-            return ResponseEntity.ok().body(userUpdated);
+            UserResponseDto userDto = this.convertToDto(userUpdated);
+            return ResponseEntity.ok().body(userDto);
         } catch (Exception e) {
             response_data.put("error", true);
             response_data.put("message", "Error del servidor: " + e.getMessage());
@@ -137,7 +179,8 @@ public class UserService {
 
         try {
             this.userRepository.deleteById(id);
-            return ResponseEntity.ok().body(optionalUser.get());
+            UserResponseDto userDto = this.convertToDto(optionalUser.get());
+            return ResponseEntity.ok().body(userDto);
         } catch (Exception e) {
             response_data.put("error", true);
             response_data.put("message", "Error del servidor: " + e.getMessage());
@@ -146,8 +189,17 @@ public class UserService {
         }
     }
 
-    public boolean checkPassword(String rawPassword, String encodedPassword) {
-        return this.passwordEncoder.matches(rawPassword, encodedPassword);
+    private UserResponseDto convertToDto(User user) {
+        return new UserResponseDto(
+                user.getId(),
+                user.getBusinessname(),
+                user.getDocnumber(),
+                user.getDoctype(),
+                user.getEmail(),
+                user.getPersontype(),
+                user.getSector(),
+                user.getSurname()
+        );
     }
 
 }
