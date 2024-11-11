@@ -2,9 +2,11 @@ package estramipyme.controller;
 
 import estramipyme.dto.LoginRequestDto;
 import estramipyme.dto.LoginResponseDto;
+import estramipyme.dto.UserResponseDto;
 import estramipyme.model.User;
 import estramipyme.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +27,7 @@ public class UserController {
     }
 
     @GetMapping("/all")
-    public  ResponseEntity<List<User>> getUsers() {
+    public  ResponseEntity<List<UserResponseDto>> getUsers() {
         return ResponseEntity.ok(this.userService.getUsers());
     }
 
@@ -51,6 +53,10 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
+        LoginResponseDto login = this.userService.login(loginRequestDto);
+        if (!login.isStatus()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(login);
+        }
         return ResponseEntity.ok(userService.login(loginRequestDto));
     }
 }
