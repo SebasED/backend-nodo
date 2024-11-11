@@ -1,5 +1,7 @@
 package estramipyme.service;
 
+import estramipyme.dto.LoginRequestDto;
+import estramipyme.dto.LoginResponseDto;
 import estramipyme.model.User;
 import estramipyme.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,32 @@ public class UserService {
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
+        Optional<User> userOptional = userRepository.findByEmail(loginRequestDto.getEmail());
+        LoginResponseDto loginResponseDto = new LoginResponseDto();
+
+        if (userOptional.isEmpty()) {
+            loginResponseDto.setMessage("Usuario no existente");
+            loginResponseDto.setStatus(false);
+
+            return loginResponseDto;
+        }
+
+        User user = userOptional.get();
+
+        if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())) {
+            loginResponseDto.setMessage("La contraseña es incorrecta");
+            loginResponseDto.setStatus(false);
+
+            return loginResponseDto;
+        }
+
+        loginResponseDto.setMessage("OK");
+        loginResponseDto.setStatus(true);
+
+        return  loginResponseDto;
     }
 
     public List<User> getUsers() {

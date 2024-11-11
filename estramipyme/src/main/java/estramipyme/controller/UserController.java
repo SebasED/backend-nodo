@@ -1,5 +1,7 @@
 package estramipyme.controller;
 
+import estramipyme.dto.LoginRequestDto;
+import estramipyme.dto.LoginResponseDto;
 import estramipyme.model.User;
 import estramipyme.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,5 +47,10 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser (@PathVariable Long id ) {
         return this.userService.deleteUser(id);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
+        return ResponseEntity.ok(userService.login(loginRequestDto));
     }
 }

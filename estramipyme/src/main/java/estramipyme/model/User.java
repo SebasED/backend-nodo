@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 
 @Entity
-@Table(name = "\"user\"")
+@Table(name = "\"user\"", schema = "public")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
