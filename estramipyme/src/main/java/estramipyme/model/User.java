@@ -3,7 +3,6 @@ package estramipyme.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
-import org.hibernate.validator.constraints.UniqueElements;
 
 @Entity
 @Table(name = "\"user\"")
