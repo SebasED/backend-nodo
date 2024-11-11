@@ -6,8 +6,9 @@ import jakarta.persistence.*;
 @Table(name = "question", schema = "public")
 public class Question {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String description;
     @ManyToOne
     @JoinColumn(referencedColumnName = "id", name = "section_id")
