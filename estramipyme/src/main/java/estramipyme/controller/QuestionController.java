@@ -1,5 +1,6 @@
 package estramipyme.controller;
 
+import estramipyme.dto.QuestionResponseDto;
 import estramipyme.model.Question;
 import estramipyme.service.QuestionService;
 import jakarta.validation.Valid;
@@ -22,7 +23,7 @@ public class QuestionController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<Question>> getAllQuestions() {
+    public ResponseEntity<List<QuestionResponseDto>> getAllQuestions() {
 
         return ResponseEntity.ok(this.questionService.getAllQuestions());
     }

@@ -1,7 +1,12 @@
 package estramipyme.service;
 
+import estramipyme.dto.QuestionResponseDto;
+import estramipyme.model.Option;
+import estramipyme.model.OptionQuestion;
 import estramipyme.model.Question;
 import estramipyme.model.Section;
+import estramipyme.repository.OptionQuestionRepository;
+import estramipyme.repository.OptionRepository;
 import estramipyme.repository.QuestionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -19,17 +25,34 @@ import java.util.Optional;
 public class QuestionService {
 
     private final QuestionRepository questionRepository;
+    private final OptionRepository optionRepository;
+    private final OptionQuestionRepository optionQuestionRepository;
     private final SectionService sectionService;
     HashMap<String, Object> response_data;
 
     @Autowired
-    public QuestionService(QuestionRepository questionRepository, SectionService sectionService) {
+    public QuestionService(QuestionRepository questionRepository, SectionService sectionService, OptionRepository optionRepository, OptionQuestionRepository optionQuestionRepository) {
         this.questionRepository = questionRepository;
         this.sectionService = sectionService;
+        this.optionRepository = optionRepository;
+        this.optionQuestionRepository = optionQuestionRepository;
     }
 
-    public List<Question> getAllQuestions() {
-        return this.questionRepository.findAll();
+    public List<QuestionResponseDto> getAllQuestions() {
+        List<Question> questions = questionRepository.findAll();
+
+        return questions.stream().map(question -> {
+            List<OptionQuestion> optionQuestions = optionQuestionRepository.findByQuestionId(question.getId());
+            List<String> optionsResponse = new ArrayList<>();
+
+            optionQuestions.forEach(optionQuestion -> {
+                Option option = optionRepository.findById(optionQuestion.getOptionId()).get();
+
+                optionsResponse.add(option.getText());
+            });
+
+            return new QuestionResponseDto(question.getId(), question.getSection().getDescription(), question.getDescription(), optionsResponse);
+        }).toList();
     }
 
     public ResponseEntity<?> getQuestion(Long id) {
