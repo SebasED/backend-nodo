@@ -26,6 +26,10 @@ public class SectionService {
         return this.sectionRepository.findById(id);
     }
 
+    public Optional<Section> getSectionByDescription(String description){
+        return this.sectionRepository.findByDescription(description);
+    }
+
     public boolean sectionExists(String sectionDescription) {
         return this.sectionRepository.existsByDescription(sectionDescription);
     }

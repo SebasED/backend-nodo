@@ -1,5 +1,6 @@
 package estramipyme.controller;
 
+import estramipyme.dto.QuestionRequestDto;
 import estramipyme.dto.QuestionResponseDto;
 import estramipyme.model.Question;
 import estramipyme.service.QuestionService;
@@ -15,8 +16,8 @@ import java.util.List;
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET})
 public class QuestionController {
 
-
     private QuestionService questionService;
+
     @Autowired
     public QuestionController(QuestionService questionService) {
         this.questionService = questionService;
@@ -34,7 +35,7 @@ public class QuestionController {
     }
 
     @PostMapping
-    public ResponseEntity<?> registerQuestion(@Valid @RequestBody Question question) {
+    public ResponseEntity<?> registerQuestion(@RequestBody QuestionRequestDto question) {
         return this.questionService.registerQuestion(question);
     }
 

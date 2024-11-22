@@ -1,5 +1,6 @@
 package estramipyme.service;
 
+import estramipyme.dto.QuestionRequestDto;
 import estramipyme.dto.QuestionResponseDto;
 import estramipyme.model.Option;
 import estramipyme.model.OptionQuestion;
@@ -71,39 +72,34 @@ public class QuestionService {
     }
 
     @Transactional
-    public ResponseEntity<?> registerQuestion(Question question) {
+    public ResponseEntity<?> registerQuestion(QuestionRequestDto question) {
         response_data = new HashMap<>();
 
         // Verify if question exists
-        boolean questionExists = this.questionRepository.existsByDescription(question.getDescription());
+        boolean questionExists = this.questionRepository.existsByDescription(question.getQuestion());
         if (questionExists) {
             response_data.put("error", true);
-            response_data.put("message", String.format("The question %s alresdy exists", question.getDescription()));
+            response_data.put("message", String.format("The question %s alresdy exists", question.getQuestion()));
             response_data.put("status", HttpStatus.CONFLICT.value());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response_data);
         }
 
         // Section validations
-        Long sectionId = question.getSection().getId();
-        Optional<Section> optionalSection = this.sectionService.getSection(sectionId);
+        String section = question.getSection();
+        Optional<Section> optionalSection = this.sectionService.getSectionByDescription(section);
         if (!optionalSection.isPresent()){
             response_data.put("error", true);
-            response_data.put("message", String.format("The section with id %d does not exists", sectionId));
-            response_data.put("status", HttpStatus.BAD_REQUEST.value());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response_data);
-        } else if (!optionalSection.get().getDescription().equals(question.getSection().getDescription())) {
-            response_data.put("error", true);
-            response_data.put("message", String
-                    .format("The section with id %d is %s, but you sent the section %s",
-                            sectionId,
-                            optionalSection.get().getDescription(),
-                            question.getSection().getDescription()));
+            response_data.put("message", String.format("The section with %s does not exists", section));
             response_data.put("status", HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response_data);
         }
 
         try {
-            Question questionSaved = this.questionRepository.save(question);
+
+            Question questionEntity = new Question();
+            questionEntity.setSection(optionalSection.get());
+            questionEntity.setDescription(question.getQuestion());
+            questionEntity.setOptions(question.getOptions());
             URI questionLocation = ServletUriComponentsBuilder
                     .fromCurrentRequest()
                     .path("/{id}")
