@@ -3,7 +3,7 @@ package estramipyme.service;
 import estramipyme.dto.LoginRequestDto;
 import estramipyme.dto.LoginResponseDto;
 import estramipyme.dto.UserResponseDto;
-import estramipyme.model.User;
+import estramipyme.model.Users;
 import estramipyme.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,7 +36,7 @@ public class UserService {
     public LoginResponseDto login(LoginRequestDto loginRequestDto) {
         response_data = new HashMap<>();
 
-        Optional<User> userOptional = userRepository.findByEmail(loginRequestDto.getEmail());
+        Optional<Users> userOptional = userRepository.findByEmail(loginRequestDto.getEmail());
         LoginResponseDto loginResponseDto = new LoginResponseDto();
 
         // Verify if email exists
@@ -47,7 +47,7 @@ public class UserService {
             return loginResponseDto;
         }
 
-        User user = userOptional.get();
+        Users user = userOptional.get();
 
         if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())) {
             loginResponseDto.setMessage("Invalid username or password");
@@ -63,14 +63,14 @@ public class UserService {
     }
 
     public List<UserResponseDto> getUsers() {
-        List<User> users= this.userRepository.findAll();
+        List<Users> users= this.userRepository.findAll();
         List<UserResponseDto> usersDto =  users.stream().map(this::convertToDto).collect(Collectors.toList());
         return usersDto;
     }
 
     public ResponseEntity<?> getUser(Long id) {
         response_data = new HashMap<>();
-        Optional<User> optionalUser = this.userRepository.findById(id);
+        Optional<Users> optionalUser = this.userRepository.findById(id);
 
         if (optionalUser.isPresent()){
             UserResponseDto userDto = this.convertToDto(optionalUser.get());
@@ -85,7 +85,7 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<?> resgisterUser(User user) {
+    public ResponseEntity<?> resgisterUser(Users user) {
         response_data = new HashMap<>();
 
         // Verify if the email already exists
@@ -111,7 +111,7 @@ public class UserService {
         user.setPassword(encryptedPassword);
 
         try {
-            User userSaved = this.userRepository.save(user);
+            Users userSaved = this.userRepository.save(user);
             UserResponseDto userDto = this.convertToDto(userSaved);
             URI userLocation = ServletUriComponentsBuilder
                     .fromCurrentRequest()
@@ -127,7 +127,7 @@ public class UserService {
         }
     }
 
-    public ResponseEntity<?> updateUser(User user) {
+    public ResponseEntity<?> updateUser(Users user) {
         response_data = new HashMap<>();
 
         // verify if id is in the request
@@ -152,7 +152,7 @@ public class UserService {
         user.setPassword(encryptedPassword);
 
         try {
-            User userUpdated = this.userRepository.save(user);
+            Users userUpdated = this.userRepository.save(user);
             UserResponseDto userDto = this.convertToDto(userUpdated);
             return ResponseEntity.ok().body(userDto);
         } catch (Exception e) {
@@ -168,7 +168,7 @@ public class UserService {
         response_data = new HashMap<>();
 
         // Get user by id and verify if id exists in the database
-        Optional<User> optionalUser = this.userRepository.findById(id);
+        Optional<Users> optionalUser = this.userRepository.findById(id);
 
         if (!optionalUser.isPresent()){
             response_data.put("error", true);
@@ -189,7 +189,7 @@ public class UserService {
         }
     }
 
-    private UserResponseDto convertToDto(User user) {
+    private UserResponseDto convertToDto(Users user) {
         return new UserResponseDto(
                 user.getId(),
                 user.getBusinessname(),
