@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "\"user\"", schema = "public")
-public class User {
+public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,18 +38,20 @@ public class User {
     @NotEmpty
     private String surname;
 
-    public User() {
+    private boolean isEnabled;
+
+    public Users() {
     }
 
-    public User(Long id,
-                String businessname,
-                String docnumber,
-                String doctype,
-                String email,
-                String password,
-                String persontype,
-                String sector,
-                String surname) {
+    public Users(Long id,
+                 String businessname,
+                 String docnumber,
+                 String doctype,
+                 String email,
+                 String password,
+                 String persontype,
+                 String sector,
+                 String surname) {
         this.id = id;
         this.businessname = businessname;
         this.docnumber = docnumber;
