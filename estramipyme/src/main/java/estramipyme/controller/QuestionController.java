@@ -1,6 +1,7 @@
 package estramipyme.controller;
 
 import estramipyme.dto.QuestionRequestDto;
+import estramipyme.dto.QuestionRequestPutDto;
 import estramipyme.dto.QuestionResponseDto;
 import estramipyme.model.Question;
 import estramipyme.service.QuestionService;
@@ -40,7 +41,7 @@ public class QuestionController {
     }
 
     @PutMapping
-    public ResponseEntity<?> updateQuestion(@RequestBody Question question){
+    public ResponseEntity<?> updateQuestion(@RequestBody QuestionRequestPutDto question){
         return this.questionService.updateQuestion(question);
     }
 

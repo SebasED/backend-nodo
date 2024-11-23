@@ -1,6 +1,7 @@
 package estramipyme.service;
 
 import estramipyme.dto.QuestionRequestDto;
+import estramipyme.dto.QuestionRequestPutDto;
 import estramipyme.dto.QuestionResponseDto;
 import estramipyme.model.Option;
 import estramipyme.model.OptionQuestion;
@@ -17,10 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class QuestionService {
@@ -43,16 +42,12 @@ public class QuestionService {
         List<Question> questions = questionRepository.findAll();
 
         return questions.stream().map(question -> {
-            List<OptionQuestion> optionQuestions = optionQuestionRepository.findByQuestionId(question.getId());
-            List<String> optionsResponse = new ArrayList<>();
+            List<String> optionsResponse = Arrays.asList(question.getOptions().split(","));
 
-            optionQuestions.forEach(optionQuestion -> {
-                Option option = optionRepository.findById(optionQuestion.getOptionId()).get();
-
-                optionsResponse.add(option.getText());
-            });
-
-            return new QuestionResponseDto(question.getId(), question.getSection().getDescription(), question.getDescription(), optionsResponse);
+            return new QuestionResponseDto(question.getId(),
+                    question.getSection().getDescription(),
+                    question.getDescription(),
+                    optionsResponse);
         }).toList();
     }
 
@@ -67,8 +62,14 @@ public class QuestionService {
             response_data.put("status", HttpStatus.NOT_FOUND.value());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response_data);
         }
+        Question question = optionalQuestion.get();
+        List<String> optionsResponse = Arrays.asList(question.getOptions().split(","));
+        QuestionResponseDto questionResponse = new QuestionResponseDto(question.getId(),
+                question.getSection().getDescription(),
+                question.getDescription(),
+                optionsResponse);
 
-        return ResponseEntity.ok(optionalQuestion.get());
+        return ResponseEntity.ok(questionResponse);
     }
 
     @Transactional
@@ -95,17 +96,26 @@ public class QuestionService {
         }
 
         try {
-
+            // Create question to save
             Question questionEntity = new Question();
             questionEntity.setSection(optionalSection.get());
             questionEntity.setDescription(question.getQuestion());
-            questionEntity.setOptions(question.getOptions());
+            String options = question.getOptions().stream().collect(Collectors.joining(","));
+            questionEntity.setOptions(options);
+            Question questionSaved = this.questionRepository.save(questionEntity);
+            // Create a URI by the new question
             URI questionLocation = ServletUriComponentsBuilder
                     .fromCurrentRequest()
                     .path("/{id}")
                     .buildAndExpand(questionSaved.getId())
                     .toUri();
-            return ResponseEntity.created(questionLocation).body(questionSaved);
+            // Create the question response
+            List<String> optionsResponse = Arrays.asList(questionSaved.getOptions().split(","));
+            QuestionResponseDto questionResponse = new QuestionResponseDto(questionSaved.getId(),
+                    questionSaved.getSection().getDescription(),
+                    questionSaved.getDescription(),
+                    optionsResponse);
+            return ResponseEntity.created(questionLocation).body(questionResponse);
         } catch (Exception e) {
             response_data.put("error", true);
             response_data.put("message", "Error del servidor: " + e.getMessage());
@@ -114,7 +124,7 @@ public class QuestionService {
         }
     }
 
-    public ResponseEntity<?> updateQuestion(Question question) {
+    public ResponseEntity<?> updateQuestion(QuestionRequestPutDto question) {
         response_data = new HashMap<>();
 
         // Verify if id is in the request
@@ -135,17 +145,41 @@ public class QuestionService {
         }
 
         // Verify if question exists
-        boolean questionExists = this.questionRepository.existsByDescription(question.getDescription());
-        if (questionExists) {
+//        boolean questionExists = this.questionRepository.existsByDescription(question.getQuestion());
+//        if (questionExists) {
+//            response_data.put("error", true);
+//            response_data.put("message", String.format("The question %s alresdy exists", question.getQuestion()));
+//            response_data.put("status", HttpStatus.CONFLICT.value());
+//            return ResponseEntity.status(HttpStatus.CONFLICT).body(response_data);
+//        }
+        // Section validations
+        String section = question.getSection();
+        Optional<Section> optionalSection = this.sectionService.getSectionByDescription(section);
+        if (!optionalSection.isPresent()){
             response_data.put("error", true);
-            response_data.put("message", String.format("The question %s alresdy exists", question.getDescription()));
-            response_data.put("status", HttpStatus.CONFLICT.value());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(response_data);
+            response_data.put("message", String.format("The section with %s does not exists", section));
+            response_data.put("status", HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response_data);
         }
+        // Create question to update
+        Question questionEntity = new Question();
+        questionEntity.setId(question.getId());
+        questionEntity.setSection(optionalSection.get());
+        questionEntity.setDescription(question.getQuestion());
+        String options = question.getOptions().stream().collect(Collectors.joining(","));
+        questionEntity.setOptions(options);
+
 
         try {
-            Question questionUpdated = this.questionRepository.save(question);
-            return ResponseEntity.ok().body(questionUpdated);
+            // Create the question response
+            Question questionUpdated = this.questionRepository.save(questionEntity);
+            List<String> optionsResponse = Arrays.asList(questionUpdated.getOptions().split(","));
+            QuestionResponseDto questionResponse = new QuestionResponseDto(questionUpdated.getId(),
+                    questionUpdated.getSection().getDescription(),
+                    questionUpdated.getDescription(),
+                    optionsResponse);
+
+            return ResponseEntity.ok().body(questionResponse);
         } catch (Exception e) {
             response_data.put("error", true);
             response_data.put("message", "Error del servidor: " + e.getMessage());
@@ -170,7 +204,12 @@ public class QuestionService {
 
         try {
             this.questionRepository.delete(optionalQuestion.get());
-            return ResponseEntity.ok().body(optionalQuestion.get());
+            List<String> optionsResponse = Arrays.asList(optionalQuestion.get().getOptions().split(","));
+            QuestionResponseDto questionResponse = new QuestionResponseDto(optionalQuestion.get().getId(),
+                    optionalQuestion.get().getSection().getDescription(),
+                    optionalQuestion.get().getDescription(),
+                    optionsResponse);
+            return ResponseEntity.ok().body(questionResponse);
         } catch (Exception e) {
             response_data.put("error", true);
             response_data.put("message", "Error del servidor: " + e.getMessage());
