@@ -74,7 +74,6 @@ public class QuestionService {
                     optionsResponse
             );
         }).toList();
-        System.out.println(questionResponseDtos);
         return ResponseEntity.ok(questionResponseDtos);
 
     }
