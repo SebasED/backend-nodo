@@ -30,6 +30,12 @@ public class QuestionController {
         return ResponseEntity.ok(this.questionService.getAllQuestions());
     }
 
+    @GetMapping("/section/{section}")
+    public ResponseEntity<?> getQuestionsBySection(@PathVariable String section) {
+
+        return ResponseEntity.ok(this.questionService.getQuestionsBySection(section));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getQuestion(@PathVariable Long id) {
         return this.questionService.getQuestion(id);

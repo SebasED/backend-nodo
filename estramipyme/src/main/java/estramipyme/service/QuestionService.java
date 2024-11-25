@@ -51,6 +51,36 @@ public class QuestionService {
         }).toList();
     }
 
+    public ResponseEntity<?> getQuestionsBySection(String section) {
+        response_data = new HashMap<>();
+
+        Optional<Section> optionalSection = this.sectionService.getSectionByDescription(section);
+        if(!optionalSection.isPresent()){
+            response_data.put("error", true);
+            response_data.put("message", String.format("%s section does not exists", section));
+            response_data.put("status", HttpStatus.NOT_FOUND.value());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response_data);
+        }
+
+        List<Question> questions = questionRepository.findBySection_Id(optionalSection.get().getId());
+
+        List<QuestionResponseDto> questionResponseDtos = questions.stream().map(question -> {
+            List<String> optionsResponse = Arrays.asList(question.getOptions().split(","));
+
+            return new QuestionResponseDto(
+                    question.getId(),
+                    question.getSection().getDescription(),
+                    question.getDescription(),
+                    optionsResponse
+            );
+        }).toList();
+        System.out.println(questionResponseDtos);
+        return ResponseEntity.ok(questionResponseDtos);
+
+    }
+
+
+
     public ResponseEntity<?> getQuestion(Long id) {
         response_data = new HashMap<>();
 
