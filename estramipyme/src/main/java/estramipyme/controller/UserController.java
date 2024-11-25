@@ -51,7 +51,8 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
-        return ResponseEntity.ok("Login successful");
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto login) {
+        LoginResponseDto loginResponseDto = this.userService.login(login);
+        return ResponseEntity.ok(loginResponseDto);
     }
 }
