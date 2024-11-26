@@ -3,25 +3,25 @@ package estramipyme.dto;
 import java.util.List;
 
 public class QuestionResponseDto {
-    private Long id;
+    private String id;
     private String section;
     private String question;
     private List<String> options;
 
     public QuestionResponseDto() {}
 
-    public QuestionResponseDto(Long id, String section, String question, List<String> options) {
+    public QuestionResponseDto(String id, String section, String question, List<String> options) {
         this.id = id;
         this.section = section;
         this.question = question;
         this.options = options;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

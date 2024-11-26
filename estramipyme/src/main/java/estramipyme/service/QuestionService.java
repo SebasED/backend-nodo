@@ -45,7 +45,7 @@ public class QuestionService {
         return questions.stream().map(question -> {
             List<String> optionsResponse = Arrays.asList(question.getOptions().split(","));
 
-            return new QuestionResponseDto(question.getId(),
+            return new QuestionResponseDto(String.valueOf(question.getId()),
                     question.getSection().getDescription(),
                     question.getDescription(),
                     optionsResponse);
@@ -69,7 +69,7 @@ public class QuestionService {
             List<String> optionsResponse = Arrays.asList(question.getOptions().split(","));
 
             return new QuestionResponseDto(
-                    question.getId(),
+                    String.valueOf(question.getId()),
                     question.getSection().getDescription(),
                     question.getDescription(),
                     optionsResponse
@@ -92,7 +92,7 @@ public class QuestionService {
         }
         Question question = optionalQuestion.get();
         List<String> optionsResponse = Arrays.asList(question.getOptions().split(","));
-        QuestionResponseDto questionResponse = new QuestionResponseDto(question.getId(),
+        QuestionResponseDto questionResponse = new QuestionResponseDto(String.valueOf(question.getId()),
                 question.getSection().getDescription(),
                 question.getDescription(),
                 optionsResponse);
@@ -139,7 +139,7 @@ public class QuestionService {
                     .toUri();
             // Create the question response
             List<String> optionsResponse = Arrays.asList(questionSaved.getOptions().split(","));
-            QuestionResponseDto questionResponse = new QuestionResponseDto(questionSaved.getId(),
+            QuestionResponseDto questionResponse = new QuestionResponseDto(String.valueOf(questionSaved.getId()),
                     questionSaved.getSection().getDescription(),
                     questionSaved.getDescription(),
                     optionsResponse);
@@ -202,7 +202,7 @@ public class QuestionService {
             // Create the question response
             Question questionUpdated = this.questionRepository.save(questionEntity);
             List<String> optionsResponse = Arrays.asList(questionUpdated.getOptions().split(","));
-            QuestionResponseDto questionResponse = new QuestionResponseDto(questionUpdated.getId(),
+            QuestionResponseDto questionResponse = new QuestionResponseDto(String.valueOf(questionUpdated.getId()),
                     questionUpdated.getSection().getDescription(),
                     questionUpdated.getDescription(),
                     optionsResponse);
@@ -233,7 +233,7 @@ public class QuestionService {
         try {
             this.questionRepository.delete(optionalQuestion.get());
             List<String> optionsResponse = Arrays.asList(optionalQuestion.get().getOptions().split(","));
-            QuestionResponseDto questionResponse = new QuestionResponseDto(optionalQuestion.get().getId(),
+            QuestionResponseDto questionResponse = new QuestionResponseDto(String.valueOf(optionalQuestion.get().getId()),
                     optionalQuestion.get().getSection().getDescription(),
                     optionalQuestion.get().getDescription(),
                     optionsResponse);
