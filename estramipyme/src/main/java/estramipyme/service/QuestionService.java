@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -74,11 +75,9 @@ public class QuestionService {
                     optionsResponse
             );
         }).toList();
-        return ResponseEntity.ok(questionResponseDtos);
+        return ResponseEntity.ok().body(questionResponseDtos);
 
     }
-
-
 
     public ResponseEntity<?> getQuestion(Long id) {
         response_data = new HashMap<>();

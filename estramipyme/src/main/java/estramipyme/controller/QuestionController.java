@@ -33,7 +33,7 @@ public class QuestionController {
     @GetMapping("/section/{section}")
     public ResponseEntity<?> getQuestionsBySection(@PathVariable String section) {
 
-        return ResponseEntity.ok(this.questionService.getQuestionsBySection(section));
+        return this.questionService.getQuestionsBySection(section);
     }
 
     @GetMapping("/{id}")
